@@ -9,6 +9,12 @@
 #include <stdio.h>
 #endif
 
+typedef struct _test{
+    int *res;
+    int c;
+    int l;
+}test;
+
 int array_push(int *arr, int n, int l) {
     int i;
     for(i = 0; i < l; i++) {
@@ -21,12 +27,38 @@ int array_push(int *arr, int n, int l) {
     return 0;
 }
 
-void bfs(int **graph, int l, int p) {
-    if(!p) return;
-    
+void sort_array(int *arr, int length) {
+    int i, j;
+    int aux;
+    for(i = 1; i < length; i++) {
+        aux = arr[i];
+        j = i - 1;
+        while(j >= 0 && arr[j] > aux) {
+            arr[j + 1] = arr[j];
+            j -= 1;
+        }
+        arr[j + 1] = aux;
+    }
+}
+
+void dfs(int **graph, int *res, int c, int l, int p) {
+    if(p < 0 || !array_push(res, l, c)) return;
+    int i;
+    for(i = 0; i < c; i++) {
+        if(graph[l][i]) dfs(graph, res, c, graph[l][i], p - 1);
+    }
+}
+
+test new_test(int *res, int c, int l) {
+    test *t = malloc(sizeof(test));
+    t->res = res;
+    t->c = c;
+    t->l = l;
+    return *t;
 }
 
 int main() {
+    test tests[100];
     int c, e, l, p, i, j, x, y, t = 0;
     int **graph;
     while(1) {
@@ -45,14 +77,19 @@ int main() {
             while(graph[y][j] && graph[y][j] != x) j++;
             graph[y][j] = x;
         }
-        bfs(graph, l, p);
+        int *res = calloc(c, sizeof(int));
+        dfs(graph, res, c, l, p);
+        sort_array(res, c);
+        tests[t] = new_test(res, c, l);
         t++;
     }
-    for(i = 1; i <= c; i++) {
-        printf("%d -> ", i);
-        for(j = 0; j < c; j++) {
-            printf("%d ", graph[i][j]);
+    for(i = 0; i < t; i++) {
+        printf("Teste %d\n", i + 1);
+        for(j = 0; j < tests[i].c; j++) {
+            if(tests[i].res[j] && tests[i].res[j] != tests[i].l) {
+                printf("%d ", tests[i].res[j]);
+            }
         }
-        printf("\n");
+        printf("\n\n");
     }
 }
